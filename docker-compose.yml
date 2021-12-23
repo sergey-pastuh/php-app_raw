@@ -1,0 +1,100 @@
+version: '3'
+services:
+
+  #App Service
+  &app-local app-local: &app-local-service-template
+    build:
+      context: ./docker/app
+      dockerfile: Dockerfile
+    image: digitalocean.com/php
+    container_name: app
+    restart: unless-stopped
+    tty: true
+    environment:
+      SCHEDULE_PERIOD: 60
+      FPM_PORT: &php-fpm-port 9005
+      FPM_USER: "${USER_ID:-1000}"
+      FPM_GROUP: "${GROUP_ID:-1000}"
+      SERVICE_NAME: app
+      SERVICE_TAGS: dev
+    working_dir: /var/www
+    command: tail -f /dev/null
+    volumes:
+       - ./app:/var/www/app
+       - ./docker/app/etc/php/local.ini:/usr/local/etc/php/conf.d/local.ini
+    networks:
+      - app-network
+
+  #Php-fpm service
+  &php-fpm-local-service php-fpm-local:
+    <<: *app-local-service-template
+    container_name: *php-fpm-local-service
+    hostname: *php-fpm-local-service
+    logging:
+      driver: "json-file"
+      options:
+        tag: "{{.Name}}"
+    user: "root:root"
+    entrypoint: /fpm-entrypoint.sh
+    command: sh -c "php-fpm --nodaemonize"
+    networks:
+      - app-network
+
+  #Nginx Service
+  webserver-local:
+    image: nginx:alpine
+   # build:
+   #   context: ./docker/nginx
+   #   dockerfile: Dockerfile
+    container_name: webserver-local
+    restart: unless-stopped
+    ports:
+      - "8010:8010"
+    volumes:
+      - ./app:/var/www/app
+      - ./docker/nginx/conf.d/:/etc/nginx/conf.d/      
+    command: nginx -g "daemon off;"
+    networks:
+      - app-network
+
+    #Redis Service
+  # redis :
+  #   image: bitnami/redis:latest
+  #   restart: unless-stopped
+  #   container_name: redis
+  #   environment:
+  #     TZ: Europe/Kiev
+  #     REDIS_PASSWORD: 'test'
+  #   ports:
+  #     - '6379:6379'
+  #   volumes:
+  #     - redis-storage:/bitnami/redis/data
+  #   networks:
+  #     - app-network
+
+  #Postgres Service 
+#  db:
+#    build:
+#      context: ./docker/db
+#      dockerfile: Dockerfile
+#    image: postgres
+#    container_name: db
+#    restart: unless-stopped
+#    tty: true
+#    ports:
+#      - "5432:5432"
+#    volumes:
+#      - dbdata:/var/lib/postgresql/data/
+#    networks:
+#      - app-network
+
+#Docker Networks
+networks:
+  app-network:
+    driver: bridge 
+
+#Volumes
+volumes:
+  dbdata:
+    driver: local
+  redis-storage:
