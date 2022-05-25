@@ -1,3 +1,7 @@
 <?php
 
-echo 'Hello! This is a start of Something beatiful. :^)';
+require('../app/Library/App.php');
+
+$app = new Library\App();
+
+$app->run();

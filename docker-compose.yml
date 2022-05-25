@@ -72,22 +72,19 @@ services:
   #   networks:
   #     - app-network
 
-  #Postgres Service 
-#  db:
-#    build:
-#      context: ./docker/db
-#      dockerfile: Dockerfile
-#    image: postgres
-#    container_name: db
-#    restart: unless-stopped
-#    tty: true
-#    ports:
-#      - "5432:5432"
-#    volumes:
-#      - dbdata:/var/lib/postgresql/data/
-#    networks:
-#      - app-network
-
+  db:
+    container_name: db
+    restart: always
+    image: postgres:latest
+    environment:
+      POSTGRES_USER: adminpg
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - 5432:5432
+    volumes:
+      - ./postgres-data:/var/lib/postgresql/data
+    networks:
+      - app-network
 #Docker Networks
 networks:
   app-network:
