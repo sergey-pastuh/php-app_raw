@@ -12,7 +12,7 @@ $routes = [
 	'WEB' => [
 		'PostsController' => [
 			'home' =>
-				['method' => 'GET', 'url' => '/home']
+				['method' => 'GET', 'url' => '/']
 		]
 	]
 ];
