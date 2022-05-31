@@ -1,0 +1,3 @@
+<?php 
+
+$defTemps = ['header', 'footer'];

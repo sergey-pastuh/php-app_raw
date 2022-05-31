@@ -16,12 +16,12 @@ class App
 		$controllerData = $router->dispatch();
 
 		if ($controllerData['name']) {
-			$controllerName = '\\Controllers\\' . $controllerData['mode'] . '\\' .$controllerData['name'];
+			$controllerName = '\\Controllers\\' . $controllerData['name'];
 			$controllerFunc = $controllerData['method'];
 			$controller = new $controllerName($controllerData['params']);
 
 		} else {
-			$controllerName = '\\Controllers\\' . $controllerData['mode'] . '\\ErrorController';
+			$controllerName = '\\Controllers\\' . 'ErrorController';
 			$controllerFunc = 'routeNotFound';
 			$controller = new $controllerName();
 		}
@@ -30,7 +30,7 @@ class App
 	}
 
 	public static function config($value) {
-		$config = file_get_contents($root . 'configs/app.php');
+		require_once self::$root . '/configs/app.php';
 
 		foreach ($config as $configKey => $configVal) {
 			if ($configKey == $value) {
@@ -40,4 +40,15 @@ class App
 
 		return false;
 	}
+
+	public static function parseTemplate($template) {
+		require_once self::$root . '/configs/templates.php';
+		$defTempsDir = self::$root . '/resources/views/DefaultTemplates/';
+
+		foreach ($defTemps as $defTemp) {
+			$template = str_replace(":{$defTemp}", file_get_contents($defTempsDir . $defTemp .'.php'), $template);
+		}
+
+		return $template;
+	}	
 }

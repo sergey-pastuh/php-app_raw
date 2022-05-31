@@ -19,14 +19,7 @@ class Router
 	    $reqUrl = parse_url($_SERVER["REQUEST_URI"], PHP_URL_PATH);
 	    $reqMet = $_SERVER['REQUEST_METHOD'];
 
-	    if (strpos($reqUrl, '/api/') !== false) {
-	    	$mode = 'API';
-			$reqUrl = substr($reqUrl, 4);
-	    } else {
-	    	$mode = 'WEB';
-	    }
-
-	    foreach ($this->routes[$mode] as $controller => $routesPerController) {
+	    foreach ($this->routes as $controller => $routesPerController) {
 	    	foreach ($routesPerController as $function => $route) {
 		        // convert urls like '/users/:uid/posts/:pid' to regular expression
 		        $pattern = "@^" . preg_replace('/\\\:[a-zA-Z0-9\_\-]+/', '([a-zA-Z0-9\-\_]+)', preg_quote($route['url'])) . "$@D";
@@ -36,11 +29,11 @@ class Router
 		            // remove the first match
 		            array_shift($matches);
 		            // call the callback with the matched positions as params
-		           	return ['name' => $controller, 'params' => $matches, 'method' => $function, 'mode' => $mode];
+		           	return ['name' => $controller, 'params' => $matches, 'method' => $function];
 		        }
 	    	}
 	    }
 
-	    return ['name' => false, 'mode' => $mode];
+	    return ['name' => false];
 	}
 }

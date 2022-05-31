@@ -2,6 +2,8 @@
 
 namespace Controllers;
 
+use Library\App;
+
 abstract class Controller
 {
 	public $routeParams = [];
@@ -21,5 +23,14 @@ abstract class Controller
 			}
 		}
 
+	}
+
+	protected function renderView(string $view) {
+		//getting a view category name by parsing controller name (Controllers/PostsController -> Posts)
+		$viewCategory = str_replace('Controller', '', substr(get_class($this), 12));
+		$viewFile = App::$root . '//resources//views//' . $viewCategory . '//' . $view .'.php';
+		$content = file_get_contents($viewFile);
+
+		print(App::parseTemplate($content));
 	}
 }
